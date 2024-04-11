@@ -88,7 +88,7 @@ const Home = ({fcmToken, getToken}: HomeProps) => {
           {'Welcome to Next.Js\nFirebase Messaging Example'}
         </h2>
 
-        {permission === "denied" && renderAllowNotificationBlock()}
+        {permission === "denied" && renderDeniedNotificationBlock()}
 
         {permission === "default" && renderAllowNotificationBlock()}
 
