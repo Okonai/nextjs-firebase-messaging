@@ -3,12 +3,34 @@ import Head from 'next/head'
 import styles from '../../styles/Home.module.css'
 import {useCallback, useEffect, useState} from "react";
 
-type HomeProps = NextPage & {
-  fcmToken?: string;
-  getToken: () => void;
-}
+import { firebaseCloudMessaging } from "../config/firebase";
 
-const Home = ({fcmToken, getToken}: HomeProps) => {
+const Home = () => {
+
+  
+  const [fcmToken, setFcmToken] = useState<string | undefined>(undefined);
+
+  const getToken = async () => {
+    try {
+      const token = await firebaseCloudMessaging.init()
+      if (token) {
+        await firebaseCloudMessaging.getMessage()
+        setFcmToken(token)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', (event) => console.log('event for the service worker', event))
+    }
+    async function setToken() {
+      await getToken()
+    }
+    setToken()
+  }, [])
 
   const [permission, setPermission] = useState<"denied" | "default" | "granted">("denied")
     const checkNotification = useCallback(async () => {
@@ -71,6 +93,9 @@ const Home = ({fcmToken, getToken}: HomeProps) => {
                    </p>
                    <p style={{marginLeft: 10, marginRight: 10, background: '#e7e7e7', padding: 10, wordBreak: 'break-word'}}>{fcmToken}</p>
                </>
+            )}
+            {!fcmToken && (
+              <button onClick={getToken}></button>
             )}
         </>
     )
